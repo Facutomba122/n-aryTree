@@ -18,7 +18,32 @@ public class NodesService {
     
     private Nodes PARENTNODE = null;
     
+    //UPDATE FUNCTIONS
     
+    public ResponseEntity<?> update(Nodes updatedNode, UUID id){
+        if (id == null || updatedNode == null){
+            return new ResponseEntity("El Id y/o el nodo a actualizar no deben ser nulos", HttpStatus.BAD_REQUEST);
+        }
+        
+        Optional<Nodes> oldNode = nodesPersistence.findById(id);
+        if (oldNode.isPresent()){
+            if (updatedNode.getValue() != null){
+                oldNode.get().setValue(updatedNode.getValue());
+            }
+            if (updatedNode.getFatherNodeId() != null){
+                oldNode.get().setFatherNodeId(updatedNode.getFatherNodeId());
+            }
+            if (updatedNode.getChildrenNodes() != null){
+                oldNode.get().setChildrenNodes(updatedNode.getChildrenNodes());
+            }
+            nodesPersistence.save(oldNode.get());
+            return new ResponseEntity("node with Id = " + oldNode.get().getId() + " update succesfully", HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity("The node doesn't exist", HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    //CREATE FUNCIONTS
     //Insert new Node nary tree
     public ResponseEntity<?> insert(String value, UUID parentId){
         //Validation
@@ -73,6 +98,52 @@ public class NodesService {
         
         } catch(Exception e) {
             throw e; 
+        }
+    }
+    
+    //DELETE FUNCTIONS
+    public ResponseEntity<?> deleteNodes(UUID id){
+        try {
+            Optional<Nodes> responseNodes = nodesPersistence.findById(id);
+            if (responseNodes.isPresent() && id != PARENTNODE.getId()){
+                List<UUID> auxList = responseNodes.get().getChildrenNodes();
+                if (!auxList.isEmpty()){
+                    for (UUID auxNode : auxList){
+                        deleteNodes(auxNode);
+                    }
+                }
+                nodesPersistence.deleteById(id);
+                return new ResponseEntity("Node and all children's has been deleted successfully", HttpStatus.ACCEPTED);
+            }
+            return new ResponseEntity("The node doesn't exist or is root node", HttpStatus.BAD_REQUEST);
+        } catch (Exception e){
+            throw e;
+        }
+    }
+    
+    public ResponseEntity<?> deletePartialNodes(UUID id){
+        try {
+            Optional<Nodes> responseNodes = nodesPersistence.findById(id);
+            if (responseNodes.isPresent() && id != PARENTNODE.getId()){
+                List<UUID> auxList = responseNodes.get().getChildrenNodes();
+                Nodes newReplacementNode = nodesPersistence.findById(auxList.get(0)).get();
+                Nodes parentNode = nodesPersistence.findById(responseNodes.get().getFatherNodeId()).get();
+                
+                auxList.remove(newReplacementNode.getId());
+                for (UUID auxId : auxList){
+                    newReplacementNode.addChildrenNode(auxId);
+                }
+                newReplacementNode.setFatherNodeId(parentNode.getId());
+                parentNode.getChildrenNodes().remove(id);
+                parentNode.addChildrenNode(newReplacementNode.getId());
+                nodesPersistence.delete(responseNodes.get());
+                nodesPersistence.save(newReplacementNode);
+                nodesPersistence.save(parentNode);
+                return new ResponseEntity("The partial delete has been succesfully", HttpStatus.ACCEPTED);
+            }
+            return new ResponseEntity("The node doesn't exist or is root node", HttpStatus.BAD_REQUEST);
+        } catch (Exception e){
+            throw e;
         }
     }
 }

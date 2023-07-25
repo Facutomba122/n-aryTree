@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,5 +38,35 @@ public class NodesController {
     @PostMapping("/nodes")
     public ResponseEntity<?> insertNewNode(@RequestParam("value")String value, @RequestParam(required = false) UUID parentId){
         return nodesService.insert(value, parentId);
+    }
+    
+    //UPDATE ENDPOINTS
+    @PutMapping("/nodes/{id}")
+    public ResponseEntity<?> updateNode(@RequestBody Nodes updatedNode, @PathVariable("id") UUID id){
+        try {
+            return nodesService.update(updatedNode, id);
+            
+        } catch (Exception e){
+            throw e;
+        }
+    }
+    
+    //DELETE ENDPOINTS  
+    @DeleteMapping("/nodes/fullDelete/{id}")
+    public ResponseEntity<?> deleteNode(@PathVariable("id") UUID id){
+        try {
+            return nodesService.deleteNodes(id);
+        } catch (Exception e){
+            throw e;
+        }
+    }
+    
+    @DeleteMapping("/nodes/partialDelete/{id}")
+    public ResponseEntity<?> partialDeleteNodes(@PathVariable("id") UUID id){
+        try {
+            return nodesService.deletePartialNodes(id);
+        } catch (Exception e){
+            throw e;
+        }
     }
 }
