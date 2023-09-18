@@ -43,7 +43,7 @@ public class NodesService {
         }
     }
     
-    //CREATE FUNCIONTS
+    //CREATE FUNCIONS
     //Insert new Node nary tree
     public ResponseEntity<?> insert(String value, UUID parentId){
         //Validation
@@ -64,7 +64,7 @@ public class NodesService {
             nodesPersistence.save(newNode);
             PARENTNODE.addChildrenNode(newNode.getId());
             nodesPersistence.save(PARENTNODE);
-            return new ResponseEntity("Node create succesfully", HttpStatus.ACCEPTED);
+            return new ResponseEntity("Node create succesfully", HttpStatus.OK);
         }
 
 
@@ -75,7 +75,7 @@ public class NodesService {
             nodesPersistence.save(newNode);
             responseParentNode.get().addChildrenNode(newNode.getId());
             nodesPersistence.save(responseParentNode.get());
-            return new ResponseEntity("Node create succesfully", HttpStatus.ACCEPTED);
+            return new ResponseEntity("Node create succesfully", HttpStatus.OK);
         } else {
             return new ResponseEntity("Parent node does not exists", HttpStatus.BAD_REQUEST);
         }
@@ -121,6 +121,7 @@ public class NodesService {
         }
     }
     
+    //deletes a new one that is replaced by its first child
     public ResponseEntity<?> deletePartialNodes(UUID id){
         try {
             Optional<Nodes> responseNodes = nodesPersistence.findById(id);

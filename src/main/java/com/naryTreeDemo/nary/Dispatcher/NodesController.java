@@ -13,35 +13,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/nodes")
 public class NodesController {
     
     @Autowired
     private NodesService nodesService;
     
     //GET ENDPOINTS
-    @GetMapping("/nodes")
+    @GetMapping("")
     public ArrayList<Nodes> viewAll(){
         ArrayList<Nodes> auxList = new ArrayList<>(nodesService.viewAll());
         return auxList;      
     }
     
-    @GetMapping("/nodes/{id}")
+    @GetMapping("/{id}")
     public Nodes findById(@PathVariable("id") UUID id){
         return nodesService.findById(id);
     }
     
     //POST ENDPOINTS
-    @PostMapping("/nodes")
+    @PostMapping("")
     public ResponseEntity<?> insertNewNode(@RequestParam("value")String value, @RequestParam(required = false) UUID parentId){
         return nodesService.insert(value, parentId);
     }
     
     //UPDATE ENDPOINTS
-    @PutMapping("/nodes/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateNode(@RequestBody Nodes updatedNode, @PathVariable("id") UUID id){
         try {
             return nodesService.update(updatedNode, id);
@@ -52,7 +54,7 @@ public class NodesController {
     }
     
     //DELETE ENDPOINTS  
-    @DeleteMapping("/nodes/fullDelete/{id}")
+    @DeleteMapping("/fullDelete/{id}")
     public ResponseEntity<?> deleteNode(@PathVariable("id") UUID id){
         try {
             return nodesService.deleteNodes(id);
@@ -61,7 +63,8 @@ public class NodesController {
         }
     }
     
-    @DeleteMapping("/nodes/partialDelete/{id}")
+    //Deletes a new one that is replaced by its first child
+    @DeleteMapping("/partialDelete/{id}")
     public ResponseEntity<?> partialDeleteNodes(@PathVariable("id") UUID id){
         try {
             return nodesService.deletePartialNodes(id);
